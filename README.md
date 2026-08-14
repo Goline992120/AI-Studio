@@ -1,11 +1,67 @@
-<div align="center">
+# AI CODE Studio & AI Vision (Full-Stack Web App)
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Ứng dụng tích hợp trọn vẹn Google Gemini 2.5/2.0 API, AI Hermes Agent tự hành, AI Vision, Code Studio và trợ lý iPhone Widget.
 
-  <h1>Built with AI Studio</h2>
+---
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## 📦 Cách xuất mã nguồn và tạo ứng dụng hoàn chỉnh
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+### 1. Xuất file mã nguồn trực tiếp từ Google AI Studio
+- Bấm vào menu **Settings / Export** ở góc trên cùng bên phải giao diện AI Studio.
+- Chọn **Export to ZIP** để tải toàn bộ source code đã đóng gói về máy tính.
+- Hoặc chọn **Export to GitHub** để đẩy trực tiếp lên kho lưu trữ GitHub của bạn.
 
-</div>
+---
+
+## 🚀 Hướng dẫn cài đặt & chạy ứng dụng cục bộ (Local / VPS)
+
+### Yêu cầu:
+- Node.js version 18+ (khuyên dùng Node.js 20 LTS)
+- npm hoặc yarn / pnpm
+
+### Các bước chạy:
+```bash
+# 1. Cài đặt các thư viện phụ thuộc
+npm install
+
+# 2. Tạo file cấu hình biến môi trường
+cp .env.example .env
+# Thêm khóa API: GEMINI_API_KEY=your_gemini_api_key_here
+
+# 3. Chạy môi trường phát triển (Dev)
+npm run dev
+
+# 4. Đóng gói bản Production hoàn chỉnh
+npm run build
+
+# 5. Khởi chạy server Production
+npm start
+```
+Ứng dụng sẽ chạy tại địa chỉ: `http://localhost:3000`
+
+---
+
+## 🐳 Đóng gói bằng Docker (Containerized App)
+
+```bash
+# Xây dựng Docker Image
+docker build -t ai-code-studio .
+
+# Khởi chạy Container
+docker run -d -p 3000:3000 -e GEMINI_API_KEY="your_api_key" --name ai-app ai-code-studio
+```
+
+---
+
+## 📱 Cài đặt thành App trên Điện thoại (iOS / Android PWA)
+
+Ứng dụng đã được tích hợp sẵn chuẩn **Progressive Web App (PWA)**:
+- **Trên iPhone / iPad (Safari)**:
+  1. Mở liên kết ứng dụng bằng trình duyệt Safari.
+  2. Bấm nút **Chia sẻ** (biểu tượng hình vuông có mũi tên hướng lên).
+  3. Chọn **Thêm vào MH chính (Add to Home Screen)**.
+  4. Ứng dụng sẽ hiển thị icon riêng và chạy toàn màn hình độc lập như một Native App.
+- **Trên Android (Chrome)**:
+  1. Mở liên kết ứng dụng trên Google Chrome.
+  2. Bấm biểu tượng 3 chấm ở góc phải trên.
+  3. Chọn **Cài đặt ứng dụng (Install App)**.

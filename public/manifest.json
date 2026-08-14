@@ -1,0 +1,16 @@
+{
+  "short_name": "GeminiStudio",
+  "name": "Gemini SDK Code Studio & AI Vision",
+  "icons": [
+    {
+      "src": "/app_logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "display": "standalone",
+  "orientation": "portrait"
+}

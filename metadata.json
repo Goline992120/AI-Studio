@@ -1,0 +1,6 @@
+{
+  "name": "AI CODE",
+  "description": "Môi trường thử nghiệm tương tác, tự động sinh mã nguồn và tra cứu bộ SDK google-genai hợp nhất mới cho Python và TypeScript.",
+  "requestFramePermissions": ["display-capture"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
