@@ -12,13 +12,15 @@ import { PowerShellCmdTab } from './components/PowerShellCmdTab';
 import { AiCapabilitiesTab } from './components/AiCapabilitiesTab';
 import { AiAgentOrchestrator } from './components/AiAgentOrchestrator';
 import { AiHermesAgentTab } from './components/AiHermesAgentTab';
+import { AiSuperIntelligenceTab } from './components/AiSuperIntelligenceTab';
+import { AppExportTab } from './components/AppExportTab';
 import { MultimodalPipAssistantTab } from './components/MultimodalPipAssistantTab';
 import { IphoneAssistantWidget } from './components/IphoneAssistantWidget';
 import { VerticalFeatureNavigation } from './components/VerticalFeatureNavigation';
 import { LayoutGrid, Flame } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('hermes');
+  const [activeTab, setActiveTab] = useState<TabType>('super_intelligence');
   const [isVerticalNavOpen, setIsVerticalNavOpen] = useState<boolean>(false);
   const [apiStatus, setApiStatus] = useState({ ok: false, checking: true, hasKey: false });
 
@@ -80,6 +82,20 @@ export default function App() {
             exit={{ opacity: 0, y: -12, scale: 0.99 }}
             transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
           >
+            {activeTab === 'super_intelligence' && (
+              <AiSuperIntelligenceTab
+                onOpenCodeStudio={(code) => {
+                  setPlaygroundConfig((prev) => ({ ...prev, prompt: code }));
+                  setActiveTab('codestudio');
+                }}
+                onOpenAppExporter={() => setActiveTab('app_exporter')}
+              />
+            )}
+
+            {activeTab === 'app_exporter' && (
+              <AppExportTab />
+            )}
+
             {activeTab === 'hermes' && (
               <AiHermesAgentTab />
             )}

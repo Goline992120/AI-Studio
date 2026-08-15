@@ -93,6 +93,19 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Quick Horizontal Tabs (Can also be used or users can use the vertical list) */}
           <nav className="flex items-center space-x-1 sm:space-x-1.5 overflow-x-auto py-1 custom-scrollbar">
+            {/* PROMINENT AI SUPER INTELLIGENCE TAB */}
+            <button
+              onClick={() => setActiveTab('super_intelligence')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs ${
+                activeTab === 'super_intelligence'
+                  ? 'bg-gradient-to-r from-cyan-500/40 via-blue-500/40 to-indigo-500/40 text-cyan-200 border border-cyan-400/60 shadow-[0_0_18px_rgba(6,182,212,0.35)]'
+                  : 'text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-cyan-500/30'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+              <span>🧠 Siêu Trí Tuệ & Đa Thư Mục</span>
+            </button>
+
             {/* PROMINENT AI HERMES AGENT TAB */}
             <button
               onClick={() => setActiveTab('hermes')}
@@ -104,6 +117,19 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Flame className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
               <span>AI Hermes &amp; Cài Đặt</span>
+            </button>
+
+            {/* APP EXPORTER TAB */}
+            <button
+              onClick={() => setActiveTab('app_exporter')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs ${
+                activeTab === 'app_exporter'
+                  ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 text-emerald-200 border border-emerald-400/50 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                  : 'text-emerald-300/90 hover:text-emerald-200 hover:bg-emerald-500/10 border border-emerald-500/20'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>📦 Xuất App Đa Thiết Bị</span>
             </button>
 
             <button

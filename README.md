@@ -65,3 +65,23 @@ docker run -d -p 3000:3000 -e GEMINI_API_KEY="your_api_key" --name ai-app ai-cod
   1. Mở liên kết ứng dụng trên Google Chrome.
   2. Bấm biểu tượng 3 chấm ở góc phải trên.
   3. Chọn **Cài đặt ứng dụng (Install App)**.
+
+---
+
+## 💻 Đóng gói thành App Desktop (Windows .exe, macOS .dmg, Linux .AppImage)
+
+Dự án đã tích hợp sẵn tệp điều khiển Electron (`electron/main.cjs`):
+
+```bash
+# 1. Cài đặt các thư viện AI và Electron (nếu chưa có)
+npm install @langchain/google-genai lucide-react framer-motion
+npm install -D electron electron-builder
+
+# 2. Build bản web & backend tối ưu
+npm run build
+
+# 3. Đóng gói thành App Desktop cài đặt tự động (.exe / .dmg / .AppImage)
+npx electron-builder
+```
+Tệp cài đặt phần mềm máy tính Desktop hoàn chỉnh sẽ được lưu trữ tự động trong thư mục `dist/`!
+

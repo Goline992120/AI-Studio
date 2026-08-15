@@ -10,28 +10,28 @@ export const GEMINI_MODELS: GeminiModelInfo[] = [
     tier: 'general',
   },
   {
-    id: 'gemini-2.5-flash',
-    name: 'Gemini 2.5 Flash',
-    category: 'text',
-    recommendedFor: 'Model tốc độ cao & suy luận thông minh đa năng',
-    supportsThinking: true,
-    tier: 'general',
-  },
-  {
     id: 'gemini-3.1-pro-preview',
     name: 'Gemini 3.1 Pro Preview',
     category: 'text',
-    recommendedFor: 'Tác vụ phức tạp, suy luận chiều sâu & kiến trúc mã nguồn',
+    recommendedFor: 'Tác vụ phức tạp, suy luận chiều sâu & kiến trúc mã nguồn lớn',
     supportsThinking: true,
     tier: 'complex',
   },
   {
     id: 'gemini-3.1-flash-lite',
-    name: 'Gemini 3.1 Flash Lite',
+    name: 'Gemini 3.1 Flash-Lite',
     category: 'text',
-    recommendedFor: 'Tác vụ siêu tốc, phản hồi nhanh & phản biện ngắn gọn',
+    recommendedFor: 'Mô hình siêu nhẹ, độ trễ cực thấp, tối ưu chi phí & phản hồi tức thì',
     supportsThinking: false,
     tier: 'fast',
+  },
+  {
+    id: 'gemini-flash-latest',
+    name: 'Gemini Flash Latest',
+    category: 'text',
+    recommendedFor: 'Bản phát hành Gemini Flash mới nhất với khả năng thích ứng cao',
+    supportsThinking: false,
+    tier: 'general',
   },
   {
     id: 'gemini-3.1-flash-lite-image',
@@ -44,6 +44,12 @@ export const GEMINI_MODELS: GeminiModelInfo[] = [
     name: 'Gemini 3.1 Flash Image',
     category: 'image',
     recommendedFor: 'Tạo ảnh chất lượng cao tùy chỉnh tỉ lệ khung hình',
+  },
+  {
+    id: 'gemini-3-pro-image',
+    name: 'Gemini 3 Pro Image',
+    category: 'image',
+    recommendedFor: 'Tạo ảnh chuyên nghiệp độ phân giải cao 2K/4K',
   },
 ];
 

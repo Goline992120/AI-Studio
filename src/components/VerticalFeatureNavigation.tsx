@@ -40,6 +40,32 @@ export interface FeatureItem {
 
 export const ALL_FEATURES: FeatureItem[] = [
   {
+    id: 'super_intelligence',
+    title: '🧠 Siêu Trí Tuệ AI & Chat Đa Thư Mục Toàn Năng',
+    shortName: 'Siêu Trí Tuệ & Đa Thư Mục',
+    category: 'Autonomous & AI',
+    badge: 'SIÊU TRÍ TUỆ & BOT BUILDER',
+    badgeColor: 'bg-cyan-500/30 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.3)]',
+    icon: Sparkles,
+    iconColor: 'text-cyan-300',
+    description: 'Hiểu ngữ cảnh sâu sắc toàn bộ dự án đa thư mục, tự động tạo Chatbot & Công cụ Đa Tác Nhân từ ô chat, lập trình chuyên sâu.',
+    highlight: 'Chain-of-Thought Deep Reasoning & Dynamic Bot Creator',
+    isNew: true,
+  },
+  {
+    id: 'app_exporter',
+    title: '📦 Trung Tâm Xuất & Đóng Gói App Đa Thiết Bị',
+    shortName: 'Xuất App Đa Thiết Bị',
+    category: 'Core Studio',
+    badge: 'UNIVERSAL PACKAGING',
+    badgeColor: 'bg-emerald-500/30 text-emerald-200 border-emerald-400/60 shadow-[0_0_12px_rgba(16,185,129,0.3)]',
+    icon: ShieldCheck,
+    iconColor: 'text-emerald-400',
+    description: 'Xuất ứng dụng trọn gói có hình ảnh logo, hỗ trợ iOS PWA, Android, Windows .exe Desktop (Electron), macOS, Linux & Docker.',
+    highlight: 'Tải trọn gói ZIP 1 chạm & Mô phỏng thiết bị',
+    isNew: true,
+  },
+  {
     id: 'hermes',
     title: 'AI Hermes Agent Tự Hành & Cài Đặt Nous Research',
     shortName: 'AI Hermes Agent',

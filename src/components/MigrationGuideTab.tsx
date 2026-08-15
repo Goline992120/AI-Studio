@@ -28,7 +28,7 @@ export const MigrationGuideTab: React.FC = () => {
         <div>
           <span className="font-bold block mb-1 text-amber-300">Lưu Ý Quan Trọng Về Mô Hình Cũ (Deprecated)</span>
           <p className="text-amber-200/80 leading-relaxed font-sans">
-            Các mô hình cũ như <code className="font-mono font-semibold text-amber-300">gemini-1.5-flash</code>, <code className="font-mono font-semibold text-amber-300">gemini-1.5-pro</code>, và <code className="font-mono font-semibold text-amber-300">gemini-2.0-flash</code> đã lỗi thời. Hãy chuyển sang <code className="font-mono font-semibold text-emerald-400">gemini-3.6-flash</code> cho xử lý văn bản chung, <code className="font-mono font-semibold text-cyan-400">gemini-3.1-pro-preview</code> cho suy luận chuyên sâu & code, và <code className="font-mono font-semibold text-purple-400">gemini-3.1-flash-lite-image</code> cho sinh hình ảnh.
+            Các mô hình cũ như <code className="font-mono font-semibold text-amber-300">gemini-1.5-flash</code>, <code className="font-mono font-semibold text-amber-300">gemini-1.5-pro</code>, và <code className="font-mono font-semibold text-amber-300">gemini-2.0-flash</code> đã được thay thế. Hãy chuyển sang <code className="font-mono font-semibold text-emerald-400">gemini-3.7-flash</code> cho xử lý văn bản và lập trình, <code className="font-mono font-semibold text-cyan-400">gemini-3.1-pro-preview</code> cho suy luận chuyên sâu & code lớn, và <code className="font-mono font-semibold text-purple-400">gemini-3.1-flash-lite-image</code> cho sinh hình ảnh.
           </p>
         </div>
       </div>

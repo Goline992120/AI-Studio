@@ -55,7 +55,7 @@ export const GeminiChatbotTab: React.FC = () => {
     `function calculateDiscount(price, userType) {\n  if (userType == "vip") {\n    return price * 0.2;\n  } else if (userType == "regular") {\n    return price * 0.05;\n  }\n  return 0;\n}`
   );
   const [intelligenceAction, setIntelligenceAction] = useState<'analyze' | 'edit' | 'summary' | 'fix'>('edit');
-  const [intelligenceModel, setIntelligenceModel] = useState<string>('gemini-3.1-pro-preview');
+  const [intelligenceModel, setIntelligenceModel] = useState<string>('gemini-3.7-flash');
   const [intelligenceResult, setIntelligenceResult] = useState<{
     text?: string;
     loading?: boolean;

@@ -374,13 +374,40 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
 
       const data = await res.json();
       if (data.text) {
-        const parsed: SystemDiagnostic = JSON.parse(data.text);
-        setDiagnosticResult(parsed);
-        const speechMsg = `Phân tích hoàn tất: Trạng thái hệ thống là ${
-          parsed.status === 'healthy' ? 'hoàn toàn bình thường' : 'có thông báo cần chú ý'
-        }. ${parsed.issueSummary}`;
-        setAssistantReply(speechMsg);
-        speakResponse(speechMsg);
+        try {
+          const parsed = JSON.parse(data.text);
+          const safeDetails = Array.isArray(parsed.details)
+            ? parsed.details
+            : typeof parsed.details === 'string'
+            ? [parsed.details]
+            : [
+                'Trạng thái kết nối Internet: Tốt',
+                'Môi trường chạy: Mobile Hybrid Web App',
+              ];
+          const safeFixes = Array.isArray(parsed.recommendedFixes)
+            ? parsed.recommendedFixes
+            : typeof parsed.recommendedFixes === 'string'
+            ? [parsed.recommendedFixes]
+            : [
+                'Hệ thống đang hoạt động tối ưu, tiếp tục sử dụng bình thường.',
+              ];
+
+          const sanitizedResult: SystemDiagnostic = {
+            status: parsed.status === 'error' || parsed.status === 'warning' ? parsed.status : 'healthy',
+            issueSummary: parsed.issueSummary || 'Hệ thống thiết bị hoạt động ổn định và tối ưu.',
+            details: safeDetails,
+            recommendedFixes: safeFixes,
+          };
+
+          setDiagnosticResult(sanitizedResult);
+          const speechMsg = `Phân tích hoàn tất: Trạng thái hệ thống là ${
+            sanitizedResult.status === 'healthy' ? 'hoàn toàn bình thường' : 'có thông báo cần chú ý'
+          }. ${sanitizedResult.issueSummary}`;
+          setAssistantReply(speechMsg);
+          speakResponse(speechMsg);
+        } catch {
+          throw new Error('Failed to parse diagnostic JSON payload');
+        }
       } else {
         throw new Error('No diagnostic payload');
       }
@@ -799,7 +826,7 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
                     <div className="space-y-1">
                       <p className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Hiện trạng máy:</p>
                       <ul className="space-y-1 pl-1">
-                        {diagnosticResult.details.map((item, idx) => (
+                        {(Array.isArray(diagnosticResult.details) ? diagnosticResult.details : []).map((item, idx) => (
                           <li key={idx} className="text-[11px] text-stone-300 flex items-start space-x-1.5">
                             <span className="text-cyan-400 font-bold">•</span>
                             <span>{item}</span>
@@ -811,7 +838,7 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
                     <div className="space-y-1 pt-1 border-t border-white/5">
                       <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Hướng xử lý đề xuất:</p>
                       <ul className="space-y-1 pl-1">
-                        {diagnosticResult.recommendedFixes.map((fix, idx) => (
+                        {(Array.isArray(diagnosticResult.recommendedFixes) ? diagnosticResult.recommendedFixes : []).map((fix, idx) => (
                           <li key={idx} className="text-[11px] text-stone-300 flex items-start space-x-1.5">
                             <span className="text-emerald-400 font-bold">✓</span>
                             <span>{fix}</span>

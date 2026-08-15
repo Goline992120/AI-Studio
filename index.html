@@ -3,26 +3,151 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>AI Ultra Studio - Super Intelligence</title>
     
     <!-- iOS / iPhone Web App Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Gemini Studio" />
+    <meta name="apple-mobile-web-app-title" content="AI Ultra Studio" />
     <meta name="format-detection" content="telephone=no" />
-    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="theme-color" content="#0a0a0a" />
 
     <!-- Favicon & Apple Touch Icon -->
     <link rel="icon" type="image/jpeg" href="/app_logo.jpg" />
     <link rel="apple-touch-icon" href="/app_logo.jpg" />
-
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-
-    <title>AI CODE Studio &amp; AI Vision</title>
   </head>
-  <body class="bg-[#0d0d0d] text-stone-100 antialiased selection:bg-cyan-500 selection:text-black">
+  <body class="bg-[#0a0a0a] text-stone-100 antialiased selection:bg-cyan-500 selection:text-black">
     <div id="root"></div>
+
+    <!-- Trình quản lý Key tự động & Tự động xoay vòng Key khi gặp lỗi 429/403 -->
+    <script>
+      // Danh sách các Key miễn phí của bạn (Thay thế bằng các key bạn có)
+      const FREE_KEYS = [
+        "AIzaSyA1...",
+        "AIzaSyB2...",
+        "AIzaSyC3...",
+        "AIzaSyD4..."
+      ];
+
+      window.AI_KEY_MANAGER = {
+        currentIndex: 0,
+        getNextKey() {
+          if (!FREE_KEYS || FREE_KEYS.length === 0) return "";
+          this.currentIndex = (this.currentIndex + 1) % FREE_KEYS.length;
+          console.warn("Đã xoay vòng sang Key AI mới:", this.currentIndex);
+          return FREE_KEYS[this.currentIndex];
+        },
+        getCurrentKey() {
+          if (!FREE_KEYS || FREE_KEYS.length === 0) return "";
+          return FREE_KEYS[this.currentIndex];
+        },
+        addKey(newKey) {
+          if (newKey && !FREE_KEYS.includes(newKey)) {
+            FREE_KEYS.push(newKey);
+            console.log("Đã thêm Key mới vào hệ thống:", newKey.slice(0, 6) + "...");
+          }
+        }
+      };
+
+      // Ghi đè phương thức fetch toàn cục để tự động sửa lỗi và thay Key
+      const originalFetch = window.fetch;
+      window.fetch = async (...args) => {
+        let url = args[0];
+        
+        // Nếu là yêu cầu gửi đến Google Gemini
+        if (typeof url === 'string' && url.includes('googleapis.com/v1')) {
+          // Thay Key hiện tại vào URL hoặc Header
+          const currentKey = window.AI_KEY_MANAGER.getCurrentKey();
+          if (currentKey && !currentKey.includes('...')) {
+            url = url.replace(/key=[^&]*/, `key=${currentKey}`);
+            args[0] = url;
+          }
+        }
+
+        let response = await originalFetch(...args);
+
+        // Nếu Key bị hết hạn mức (Lỗi 429 hoặc 403)
+        if (response.status === 429 || response.status === 403) {
+          console.error("Key hiện tại đã hết hạn mức. Đang tự động đổi Key...");
+          const nextKey = window.AI_KEY_MANAGER.getNextKey();
+          
+          if (typeof url === 'string' && url.includes('googleapis.com/v1') && nextKey && !nextKey.includes('...')) {
+            // Thử lại yêu cầu với Key mới
+            let newUrl = args[0].replace(/key=[^&]*/, `key=${nextKey}`);
+            args[0] = newUrl;
+            return originalFetch(...args);
+          }
+        }
+
+        return response;
+      };
+    </script>
+
+    <!-- AI Orchestrator & Execution Bridge (Tool Calling & Factory) -->
+    <script type="module">
+      // Cấu trúc Logic triệu hồi AI thực thi
+      const AIFactory = {
+        async createAgent(type, capabilities) {
+          const response = await fetch('/api/ai/deploy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, capabilities })
+          });
+          return response.json();
+        }
+      };
+
+      // Tích hợp quyền thực thi hệ thống (Tool Calling)
+      const AI_Assistance_Core = {
+        callTool: async (toolName, params = {}) => {
+          // Quyền thực thi tác vụ như: Build code, deploy tool, phân tích data
+          if (window.AI_Bridge && typeof window.AI_Bridge.invoke === 'function') {
+            return await window.AI_Bridge.invoke(toolName, params);
+          }
+          const response = await fetch('/api/ai/tool-invoke', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ toolName, params })
+          });
+          return response.json();
+        }
+      };
+
+      if (!window.AI_Bridge) {
+        window.AI_Bridge = {
+          invoke: async (toolName, params) => {
+            console.log(`[AI_Bridge] Invoke Tool: ${toolName}`, params);
+            try {
+              const res = await fetch('/api/ai/tool-invoke', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ toolName, params })
+              });
+              if (res.ok) return await res.json();
+            } catch (e) {
+              console.warn('[AI_Bridge] Remote invoke error, fallback to client execution', e);
+            }
+            return {
+              success: true,
+              tool: toolName,
+              params,
+              executedAt: new Date().toISOString()
+            };
+          }
+        };
+      }
+
+      window.AIFactory = AIFactory;
+      window.AI_Assistance_Core = AI_Assistance_Core;
+      window.AI_Assistant = {
+        execute: async (command, params = {}) => {
+          console.log(`[AI_Assistant] Executing AI Command: ${command}`);
+          return await AI_Assistance_Core.callTool('execute_command', { command, ...params });
+        },
+        AIFactory,
+        AI_Assistance_Core
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

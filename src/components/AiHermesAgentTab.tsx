@@ -265,7 +265,7 @@ export const AiHermesAgentTab: React.FC = () => {
         logTitle = 'Network & Gateway Socket';
         logError = 'Gateway Timeout (504): Mạng máy chủ phản hồi chậm >5000ms';
         logAction = 'Hermes kích hoạt đường truyền song song qua Fallback Edge Router trong 28ms';
-        fallbackModel = 'gemini-2.0-flash';
+        fallbackModel = 'gemini-3.1-flash-lite';
       } else if (type === 'image_svg_fallback') {
         logTitle = 'AI Image Generation Engine';
         logError = 'Imagen API Quota Exhausted (Lỗi 403/429)';
@@ -373,7 +373,7 @@ Hệ thống đã tự động kích hoạt giao thức khắc phục sự cố 
 \`\`\`typescript
 // Hermes Microservice Resilient Core
 export async function executeResilientCall<T>(taskFn: () => Promise<T>, retries = 3): Promise<T> {
-  const models = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  const models = ['gemini-3.7-flash', 'gemini-3.1-pro-preview', 'gemini-3.1-flash-lite'];
   for (let i = 0; i < models.length; i++) {
     try {
       return await taskFn();

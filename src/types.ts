@@ -1,6 +1,44 @@
 export type SdkLanguage = 'python' | 'typescript';
 
-export type TabType = 'playground' | 'pip_stream' | 'hermes' | 'screen' | 'chatbot' | 'codestudio' | 'powershell' | 'orchestrator' | 'aifeatures' | 'quickstart' | 'migration';
+export type TabType =
+  | 'super_intelligence'
+  | 'codestudio'
+  | 'hermes'
+  | 'playground'
+  | 'pip_stream'
+  | 'screen'
+  | 'chatbot'
+  | 'powershell'
+  | 'orchestrator'
+  | 'aifeatures'
+  | 'app_exporter'
+  | 'quickstart'
+  | 'migration';
+
+export interface CustomAgentItem {
+  id: string;
+  name: string;
+  description: string;
+  avatar: string;
+  category: 'chatbot' | 'code_tool' | 'multi_agent' | 'vision_expert' | 'automation';
+  systemInstruction: string;
+  model: string;
+  temperature: number;
+  roles: { role: string; task: string }[];
+  toolsEnabled: string[];
+  createdAt: string;
+  isBuiltIn?: boolean;
+}
+
+export interface WorkspaceFolder {
+  id: string;
+  name: string;
+  path: string;
+  description: string;
+  filesCount: number;
+  type: 'folder' | 'file';
+  subFolders?: string[];
+}
 
 export interface VpsConfig {
   vpsHost: string;
