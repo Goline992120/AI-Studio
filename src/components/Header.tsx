@@ -17,7 +17,8 @@ import {
   Menu,
   Sparkles,
   ChevronRight,
-  ListOrdered
+  ListOrdered,
+  Clapperboard
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -93,6 +94,19 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Quick Horizontal Tabs (Can also be used or users can use the vertical list) */}
           <nav className="flex items-center space-x-1 sm:space-x-1.5 overflow-x-auto py-1 custom-scrollbar">
+            {/* PROMINENT GOOGLE AI STUDIO TAB */}
+            <button
+              onClick={() => setActiveTab('google_studio')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs ${
+                activeTab === 'google_studio'
+                  ? 'bg-gradient-to-r from-blue-600/40 via-cyan-500/40 to-indigo-600/40 text-cyan-100 border border-cyan-400/70 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                  : 'text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-cyan-500/30'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <span>✨ Google AI Studio</span>
+            </button>
+
             {/* PROMINENT AI SUPER INTELLIGENCE TAB */}
             <button
               onClick={() => setActiveTab('super_intelligence')}
@@ -104,6 +118,19 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
               <span>🧠 Siêu Trí Tuệ & Đa Thư Mục</span>
+            </button>
+
+            {/* RUNWAY AI VIDEO AGENT TAB */}
+            <button
+              onClick={() => setActiveTab('runway')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs ${
+                activeTab === 'runway'
+                  ? 'bg-gradient-to-r from-purple-500/40 via-fuchsia-500/40 to-indigo-500/40 text-purple-200 border border-purple-400/60 shadow-[0_0_18px_rgba(168,85,247,0.35)]'
+                  : 'text-purple-300/90 hover:text-white hover:bg-purple-500/10 border border-purple-500/30'
+              }`}
+            >
+              <Clapperboard className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+              <span>🎬 Runway Gen-3 AI Video</span>
             </button>
 
             {/* PROMINENT AI HERMES AGENT TAB */}

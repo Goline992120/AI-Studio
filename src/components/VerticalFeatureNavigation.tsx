@@ -21,7 +21,8 @@ import {
   ExternalLink,
   Sparkles,
   Smartphone,
-  Laptop
+  Laptop,
+  Clapperboard
 } from 'lucide-react';
 
 export interface FeatureItem {
@@ -40,6 +41,19 @@ export interface FeatureItem {
 
 export const ALL_FEATURES: FeatureItem[] = [
   {
+    id: 'google_studio',
+    title: '✨ Google AI Studio Workspace (Gemini 2.5 / 3.7 / Imagen 3)',
+    shortName: 'Google AI Studio',
+    category: 'Core Studio',
+    badge: 'GOOGLE AI STUDIO OFFICIAL',
+    badgeColor: 'bg-gradient-to-r from-blue-500/30 via-cyan-500/30 to-indigo-500/30 text-cyan-200 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.35)]',
+    icon: Sparkles,
+    iconColor: 'text-cyan-300',
+    description: 'Môi trường phát triển và thử nghiệm Prompt chuẩn Google AI Studio. Tinh chỉnh Hyperparameters, Google Search Grounding, JSON Structured Output, Imagen 3 và xuất SDK Python/TypeScript.',
+    highlight: 'Gemini 2.5 Pro/Flash • Google Search Grounding • SDK Exporter',
+    isNew: true,
+  },
+  {
     id: 'super_intelligence',
     title: '🧠 Siêu Trí Tuệ AI & Chat Đa Thư Mục Toàn Năng',
     shortName: 'Siêu Trí Tuệ & Đa Thư Mục',
@@ -50,6 +64,19 @@ export const ALL_FEATURES: FeatureItem[] = [
     iconColor: 'text-cyan-300',
     description: 'Hiểu ngữ cảnh sâu sắc toàn bộ dự án đa thư mục, tự động tạo Chatbot & Công cụ Đa Tác Nhân từ ô chat, lập trình chuyên sâu.',
     highlight: 'Chain-of-Thought Deep Reasoning & Dynamic Bot Creator',
+    isNew: true,
+  },
+  {
+    id: 'runway',
+    title: '🎬 Runway AI Video Agent & Director Studio (Gen-3 Alpha / Turbo)',
+    shortName: 'Runway Gen-3 AI Video',
+    category: 'Autonomous & AI',
+    badge: 'RUNWAY GEN-3 & ACT-ONE',
+    badgeColor: 'bg-purple-500/30 text-purple-200 border-purple-400/60 shadow-[0_0_12px_rgba(168,85,247,0.3)]',
+    icon: Clapperboard,
+    iconColor: 'text-purple-400',
+    description: 'Tác tử điện ảnh cao cấp tích hợp Runway Gen-3 Alpha Turbo, điều khiển vector camera 3D (Pan/Tilt/Zoom/Roll/Orbit), Multi-Motion Brush, lập kịch bản Storyboard và Act-One biểu cảm.',
+    highlight: 'Gen-3 Alpha Turbo • 3D Camera Vectors & Multi-Motion Brush',
     isNew: true,
   },
   {

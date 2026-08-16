@@ -250,6 +250,13 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
     const lowerCmd = command.toLowerCase();
 
     // 1. Navigation Commands
+    if (lowerCmd.includes('runway') || lowerCmd.includes('video ai') || lowerCmd.includes('làm video') || lowerCmd.includes('sinh video') || lowerCmd.includes('gen3')) {
+      switchTab('runway');
+      const reply = 'Đã mở trung tâm Runway AI Video Studio (Gen-3 Alpha & Act-One) cho anh!';
+      setAssistantReply(reply);
+      speakResponse(reply);
+      return;
+    }
     if (lowerCmd.includes('hermes') || lowerCmd.includes('tự hành') || lowerCmd.includes('tự trị')) {
       switchTab('hermes');
       const reply = 'Đã mở trung tâm chỉ huy AI Hermes Agent tự hành toàn diện!';
@@ -764,7 +771,7 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
                     value={textInput}
                     onChange={(e) => setTextInput(e.target.value)}
                     placeholder="Nhập hoặc nói câu lệnh trợ lý..."
-                    className="flex-1 bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-cyan-500/50"
+                    className="flex-1 bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-hidden focus:border-cyan-500/50"
                   />
                   <button
                     type="submit"
@@ -774,6 +781,39 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
                     <Send className="w-3.5 h-3.5" />
                   </button>
                 </form>
+
+                {/* Quick Suggestion Pills */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <button
+                    onClick={() => {
+                      switchTab('runway');
+                      const msg = 'Đã chuyển sang Runway AI Video Studio! Anh có thể xem video và bấm "Lưu vào iPhone" để tải vào thư viện Ảnh.';
+                      setAssistantReply(msg);
+                      speakResponse(msg);
+                    }}
+                    className="text-[10px] font-semibold px-2 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg border border-purple-500/30 flex items-center space-x-1 cursor-pointer"
+                  >
+                    <span>🎬 Mở Runway Video & Lưu iPhone</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleRunDiagnostic();
+                    }}
+                    className="text-[10px] font-semibold px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg border border-emerald-500/30 flex items-center space-x-1 cursor-pointer"
+                  >
+                    <span>🔍 Chẩn đoán lỗi máy</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleTranslateScreen();
+                    }}
+                    className="text-[10px] font-semibold px-2 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 rounded-lg border border-cyan-500/30 flex items-center space-x-1 cursor-pointer"
+                  >
+                    <span>🌐 Dịch trang Tiếng Việt</span>
+                  </button>
+                </div>
               </div>
             )}
 

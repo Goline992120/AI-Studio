@@ -14,7 +14,9 @@ import { AiAgentOrchestrator } from './components/AiAgentOrchestrator';
 import { AiHermesAgentTab } from './components/AiHermesAgentTab';
 import { AiSuperIntelligenceTab } from './components/AiSuperIntelligenceTab';
 import { AppExportTab } from './components/AppExportTab';
+import { RunwayAgentTab } from './components/RunwayAgentTab';
 import { MultimodalPipAssistantTab } from './components/MultimodalPipAssistantTab';
+import { GoogleStudioTab } from './components/GoogleStudioTab';
 import { IphoneAssistantWidget } from './components/IphoneAssistantWidget';
 import { VerticalFeatureNavigation } from './components/VerticalFeatureNavigation';
 import { LayoutGrid, Flame } from 'lucide-react';
@@ -82,6 +84,10 @@ export default function App() {
             exit={{ opacity: 0, y: -12, scale: 0.99 }}
             transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
           >
+            {activeTab === 'google_studio' && (
+              <GoogleStudioTab />
+            )}
+
             {activeTab === 'super_intelligence' && (
               <AiSuperIntelligenceTab
                 onOpenCodeStudio={(code) => {
@@ -94,6 +100,10 @@ export default function App() {
 
             {activeTab === 'app_exporter' && (
               <AppExportTab />
+            )}
+
+            {activeTab === 'runway' && (
+              <RunwayAgentTab />
             )}
 
             {activeTab === 'hermes' && (

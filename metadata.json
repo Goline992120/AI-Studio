@@ -1,6 +1,6 @@
 {
   "name": "AI CODE",
-  "description": "Studio Lập Trình Siêu Trí Tuệ AI, Chat Đa Thư Mục Toàn Năng, Tự Động Tạo Chatbot & Tác Nhân AI Đa Nền Tảng với Hermes Sovereign Core.",
+  "description": "Studio Lập Trình Siêu Trí Tuệ AI, Google AI Studio Workspace Chuẩn v2.17, Chat Đa Thư Mục Toàn Năng, Runway Gen-3 AI Video Director Agent, Tự Động Tạo Chatbot & Tác Nhân AI Đa Nền Tảng với Hermes Sovereign Core.",
   "requestFramePermissions": ["display-capture"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
