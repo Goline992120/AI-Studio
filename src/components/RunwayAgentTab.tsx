@@ -180,6 +180,7 @@ export const RunwayAgentTab: React.FC = () => {
 
   // Video Player Controls
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const directorRecognitionRef = useRef<any>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [isSavingIPhone, setIsSavingIPhone] = useState<boolean>(false);
@@ -343,6 +344,24 @@ export const RunwayAgentTab: React.FC = () => {
       return;
     }
 
+    if (isDirectorRecording && directorRecognitionRef.current) {
+      try {
+        directorRecognitionRef.current.stop();
+      } catch (e) {
+        try {
+          directorRecognitionRef.current.abort();
+        } catch (_) {}
+      }
+      setIsDirectorRecording(false);
+      return;
+    }
+
+    if (directorRecognitionRef.current) {
+      try {
+        directorRecognitionRef.current.abort();
+      } catch (_) {}
+    }
+
     try {
       const recognition = new SpeechRecognition();
       recognition.lang = 'vi-VN';
@@ -363,19 +382,26 @@ export const RunwayAgentTab: React.FC = () => {
         }
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (event: any) => {
         setIsDirectorRecording(false);
-        setSaveNotice('Không thể thu âm giọng nói. Vui lòng kiểm tra quyền microphone.');
-        setTimeout(() => setSaveNotice(null), 3000);
+        if (event?.error !== 'no-speech' && event?.error !== 'aborted') {
+          setSaveNotice('Không thể thu âm giọng nói. Vui lòng kiểm tra quyền microphone.');
+          setTimeout(() => setSaveNotice(null), 3000);
+        }
       };
 
       recognition.onend = () => {
         setIsDirectorRecording(false);
       };
 
+      directorRecognitionRef.current = recognition;
       recognition.start();
-    } catch (err) {
+      setIsDirectorRecording(true);
+    } catch (err: any) {
       setIsDirectorRecording(false);
+      if (err?.name !== 'InvalidStateError' && !err?.message?.includes('already started')) {
+        console.warn('Speech recognition notice:', err);
+      }
     }
   };
 

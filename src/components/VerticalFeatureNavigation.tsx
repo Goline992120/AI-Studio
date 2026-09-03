@@ -22,7 +22,9 @@ import {
   Sparkles,
   Smartphone,
   Laptop,
-  Clapperboard
+  Clapperboard,
+  Mic,
+  Activity
 } from 'lucide-react';
 
 export interface FeatureItem {
@@ -41,6 +43,45 @@ export interface FeatureItem {
 
 export const ALL_FEATURES: FeatureItem[] = [
   {
+    id: 'ai_gateway',
+    title: '🌐 MULTI-MODEL AI GATEWAY (02/09/2026 EDITION)',
+    shortName: 'AI GATEWAY 02/09/2026',
+    category: 'Autonomous & AI',
+    badge: 'FRONTIER 4-MODEL ROUTER',
+    badgeColor: 'bg-amber-400/30 text-amber-300 border-amber-400/80 shadow-[0_0_15px_#f59e0b]',
+    icon: Cpu,
+    iconColor: 'text-amber-400',
+    description: 'Dynamic Router định tuyến tự động giữa Gemini 3.8 Flash (Skimaki), DeepSeek V4 305B Multimodal Free, Claude Fable 5.1, Claude Mythos 5.1 & OpenAI Astra.',
+    highlight: 'Gemini 3.8 Flash • DeepSeek 305B • Claude Fable/Mythos 5.1 • OpenAI Astra',
+    isNew: true,
+  },
+  {
+    id: 'hud_dashboard',
+    title: '⚡ SOVEREIGN OS ULTIMATE v3.1.2 / v5.0 (QUANTUM HUD & OMNI AI)',
+    shortName: 'HUD QUANTUM v3.1.2',
+    category: 'Autonomous & AI',
+    badge: 'CYBERPUNK QUANTUM HUD',
+    badgeColor: 'bg-cyan-400/30 text-cyan-300 border-cyan-400/80 shadow-[0_0_15px_#00ffff]',
+    icon: Activity,
+    iconColor: 'text-cyan-400',
+    description: 'HUD lượng tử 3D, Lõi AU trung tâm quay 3 lớp 10s-15s, Voice STT/TTS, Omni Chat, Flux Image Generator, 4 Trụ Data Stream, 6 Module Online & Tự Sửa Lỗi Siêu Tốc.',
+    highlight: 'Quantum Grid • Omni AI • Flux Image • Voice Command • Auto Fix',
+    isNew: true,
+  },
+  {
+    id: 'ultimate_mode',
+    title: '⚡ SOVEREIGN OS ULTIMATE v4.0 (15 NĂNG LỰC META AI CLONE)',
+    shortName: 'ULTIMATE MODE',
+    category: 'Autonomous & AI',
+    badge: '15-IN-1 META ULTIMATE',
+    badgeColor: 'bg-yellow-400/30 text-yellow-300 border-yellow-400/80 shadow-[0_0_15px_rgba(250,204,21,0.5)]',
+    icon: Flame,
+    iconColor: 'text-yellow-400',
+    description: 'Chat Llama 4 10M Token, Emu Imagine, Movie Gen, 3s Voice Clone, Vision OCR, Memory vĩnh viễn, Auto Post FB/IG, Ray-Ban Vision, Code Interpreter & Chợ Plugin $99.',
+    highlight: 'Llama 4 • Emu Flux • Movie Gen • 3s Voice Clone • Ray-Ban Vision',
+    isNew: true,
+  },
+  {
     id: 'google_studio',
     title: '✨ Google AI Studio Workspace (Gemini 2.5 / 3.7 / Imagen 3)',
     shortName: 'Google AI Studio',
@@ -54,6 +95,19 @@ export const ALL_FEATURES: FeatureItem[] = [
     isNew: true,
   },
   {
+    id: 'meta_ai',
+    title: '🔥 Meta AI Full Clone (Llama-4-Maverick & Multimodal Suite)',
+    shortName: 'META AI FULL',
+    category: 'Autonomous & AI',
+    badge: 'LLAMA-4 & 6-IN-1 SUITE',
+    badgeColor: 'bg-blue-500/30 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(0,255,255,0.4)]',
+    icon: Sparkles,
+    iconColor: 'text-cyan-300',
+    description: 'Trò chuyện Llama-4, Tạo ảnh Pollinations 1024x1024, Phân tích tệp PDF/Excel/Ảnh (Vision), Tìm kiếm Web Grounding, Giọng nói 2 chiều & Bộ nhớ ngữ cảnh.',
+    highlight: 'Llama-4-Maverick • Pollinations Image • Vision OCR • Web Grounding',
+    isNew: true,
+  },
+  {
     id: 'super_intelligence',
     title: '🧠 Siêu Trí Tuệ AI & Chat Đa Thư Mục Toàn Năng',
     shortName: 'Siêu Trí Tuệ & Đa Thư Mục',
@@ -64,6 +118,19 @@ export const ALL_FEATURES: FeatureItem[] = [
     iconColor: 'text-cyan-300',
     description: 'Hiểu ngữ cảnh sâu sắc toàn bộ dự án đa thư mục, tự động tạo Chatbot & Công cụ Đa Tác Nhân từ ô chat, lập trình chuyên sâu.',
     highlight: 'Chain-of-Thought Deep Reasoning & Dynamic Bot Creator',
+    isNew: true,
+  },
+  {
+    id: 'voice_interaction',
+    title: '🎙️ Voice Interaction Hub & Web Speech API Agent Bridge',
+    shortName: 'Voice Interaction AI',
+    category: 'Autonomous & AI',
+    badge: 'VOICE-TO-TEXT & BRIDGE',
+    badgeColor: 'bg-cyan-500/30 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.3)]',
+    icon: Mic,
+    iconColor: 'text-cyan-400',
+    description: 'Nhận diện giọng nói thời gian thực với hiệu ứng sóng âm Pulsing. Cầu nối trực tiếp với window.AI_Assistant.execute thực thi tác vụ AI thông minh bằng tiếng Việt.',
+    highlight: 'Web Speech API • Concentric Wave Visualizer • Agent Action Bridge',
     isNew: true,
   },
   {
@@ -156,13 +223,13 @@ export const ALL_FEATURES: FeatureItem[] = [
   },
   {
     id: 'codestudio',
-    title: 'Code Studio (IDE Python & TypeScript)',
-    shortName: 'Code Studio IDE',
+    title: 'Sovereign Code (IDE Python & TypeScript)',
+    shortName: 'Sovereign Code',
     category: 'Core Studio',
     badge: 'IDE SONG SONG',
     badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
     icon: Code2,
-    iconColor: 'text-indigo-400',
+    iconColor: 'text-cyan-400',
     description: 'Trình soạn thảo mã nguồn so sánh trực quan giữa cú pháp google-genai (Python) và @google/genai (TypeScript).',
     highlight: 'Syntax Highlighting & Run',
   },
@@ -180,15 +247,16 @@ export const ALL_FEATURES: FeatureItem[] = [
   },
   {
     id: 'orchestrator',
-    title: 'Điều Khiển Tác Nhân AI (Agent Orchestrator)',
-    shortName: 'Agent Orchestrator',
+    title: '👑 AI Master Orchestrator (AMO Meta-Agent 5-Stage)',
+    shortName: 'AI Master Orchestrator',
     category: 'Autonomous & AI',
-    badge: 'MULTI-AGENT',
-    badgeColor: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
-    icon: Bot,
-    iconColor: 'text-sky-400',
-    description: 'Phân tách bài toán phức tạp và phân bổ tự động cho các tác nhân AI chuyên biệt thực thi.',
-    highlight: 'Hợp nhất 6 Node tác nhân',
+    badge: '5-STAGE META-PIPELINE',
+    badgeColor: 'bg-cyan-500/30 text-cyan-200 border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.3)]',
+    icon: Sparkles,
+    iconColor: 'text-cyan-400',
+    description: 'Bộ não điều phối đa tác nhân (Code Architect, Data Logic, RAG Search, Creative Director), tự động định tuyến intent và suy luận Chain-of-Thought.',
+    highlight: 'Multi-Agent Intent Routing • Zero-Fluff Synthesis',
+    isNew: true,
   },
   {
     id: 'aifeatures',
@@ -396,13 +464,13 @@ export const VerticalFeatureNavigation: React.FC<VerticalFeatureNavigationProps>
               </div>
               <div>
                 <h2 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-2">
-                  <span>Danh Mục Tính Năng (Dọc)</span>
+                  <span>Danh Mục Toàn Bộ Tính Năng</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    11 Phân Hệ
+                    {ALL_FEATURES.length} Phân Hệ
                   </span>
                 </h2>
                 <p className="text-[11px] text-white/50">
-                  Tối ưu giao diện danh sách dọc cho cả Di Động & Máy Tính
+                  Danh sách đầy đủ mọi tính năng AI, SDK và công cụ lập trình
                 </p>
               </div>
             </div>
@@ -447,7 +515,7 @@ export const VerticalFeatureNavigation: React.FC<VerticalFeatureNavigationProps>
                     : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                {cat === 'all' ? 'Tất Cả (11)' : cat}
+                {cat === 'all' ? `Tất Cả (${ALL_FEATURES.length})` : cat}
               </button>
             ))}
           </div>

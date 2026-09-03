@@ -11,18 +11,24 @@ import { MigrationGuideTab } from './components/MigrationGuideTab';
 import { PowerShellCmdTab } from './components/PowerShellCmdTab';
 import { AiCapabilitiesTab } from './components/AiCapabilitiesTab';
 import { AiAgentOrchestrator } from './components/AiAgentOrchestrator';
+import { AiMasterOrchestratorTab } from './components/AiMasterOrchestratorTab';
 import { AiHermesAgentTab } from './components/AiHermesAgentTab';
 import { AiSuperIntelligenceTab } from './components/AiSuperIntelligenceTab';
 import { AppExportTab } from './components/AppExportTab';
 import { RunwayAgentTab } from './components/RunwayAgentTab';
+import { VoiceInteractionTab } from './components/VoiceInteractionTab';
+import { MetaAIFeatures } from './components/MetaAIFeatures';
+import { UltimateDashboard } from './components/UltimateDashboard';
+import { SovereignHudDashboard } from './components/SovereignHudDashboard';
 import { MultimodalPipAssistantTab } from './components/MultimodalPipAssistantTab';
 import { GoogleStudioTab } from './components/GoogleStudioTab';
 import { IphoneAssistantWidget } from './components/IphoneAssistantWidget';
 import { VerticalFeatureNavigation } from './components/VerticalFeatureNavigation';
+import { AiGatewayStudio } from './components/AiGatewayStudio';
 import { LayoutGrid, Flame } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('super_intelligence');
+  const [activeTab, setActiveTab] = useState<TabType>('hud_dashboard');
   const [isVerticalNavOpen, setIsVerticalNavOpen] = useState<boolean>(false);
   const [apiStatus, setApiStatus] = useState({ ok: false, checking: true, hasKey: false });
 
@@ -75,17 +81,34 @@ export default function App() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 12, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.99 }}
-            transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-          >
+      {activeTab === 'hud_dashboard' ? (
+        <main className="flex-1 w-full">
+          <SovereignHudDashboard onOpenFullSuite={() => setActiveTab('ultimate_mode')} />
+        </main>
+      ) : (
+        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 12, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.99 }}
+              transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              {activeTab === 'ai_gateway' && (
+                <AiGatewayStudio />
+              )}
+
+              {activeTab === 'ultimate_mode' && (
+                <UltimateDashboard />
+              )}
+
             {activeTab === 'google_studio' && (
               <GoogleStudioTab />
+            )}
+
+            {activeTab === 'meta_ai' && (
+              <MetaAIFeatures />
             )}
 
             {activeTab === 'super_intelligence' && (
@@ -100,6 +123,10 @@ export default function App() {
 
             {activeTab === 'app_exporter' && (
               <AppExportTab />
+            )}
+
+            {activeTab === 'voice_interaction' && (
+              <VoiceInteractionTab onNavigateTab={(tab) => setActiveTab(tab as TabType)} />
             )}
 
             {activeTab === 'runway' && (
@@ -139,7 +166,7 @@ export default function App() {
             )}
 
             {activeTab === 'orchestrator' && (
-              <AiAgentOrchestrator />
+              <AiMasterOrchestratorTab />
             )}
 
             {activeTab === 'quickstart' && (
@@ -152,17 +179,7 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
       </main>
-
-      {/* Floating Quick Action for Mobile/Desktop to open Vertical Feature List */}
-      <button
-        onClick={() => setIsVerticalNavOpen(true)}
-        className="fixed bottom-6 left-6 z-30 flex items-center space-x-2 px-3.5 py-2.5 rounded-2xl bg-[#121214]/90 hover:bg-[#1a1a1f] backdrop-blur-md border border-cyan-500/40 text-cyan-300 text-xs font-bold shadow-2xl shadow-cyan-500/20 hover:scale-105 transition-all cursor-pointer group"
-        title="Mở Danh Mục Tính Năng Dọc"
-      >
-        <LayoutGrid className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
-        <span className="hidden sm:inline">Danh Sách Tính Năng Dọc</span>
-        <span className="sm:hidden font-mono">11 Tính Năng</span>
-      </button>
+      )}
 
       {/* Floating iPhone Assistant Widget */}
       <IphoneAssistantWidget

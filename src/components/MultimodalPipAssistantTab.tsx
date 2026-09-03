@@ -277,7 +277,13 @@ export const MultimodalPipAssistantTab: React.FC = () => {
   const handleToggleVoice = async () => {
     if (isVoiceActive) {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          try {
+            recognitionRef.current.abort();
+          } catch (_) {}
+        }
       }
       setIsVoiceActive(false);
     } else {
@@ -288,10 +294,20 @@ export const MultimodalPipAssistantTab: React.FC = () => {
           return;
         }
 
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.abort();
+          } catch (e) {}
+        }
+
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'vi-VN';
+
+        recognition.onstart = () => {
+          setIsVoiceActive(true);
+        };
 
         recognition.onresult = (event: any) => {
           let currentInterim = '';
@@ -313,11 +329,25 @@ export const MultimodalPipAssistantTab: React.FC = () => {
           setInterimTranscript(currentInterim);
         };
 
-        recognition.start();
+        recognition.onerror = (event: any) => {
+          if (event?.error !== 'no-speech' && event?.error !== 'aborted') {
+            console.warn('Multimodal speech error:', event?.error);
+          }
+          setIsVoiceActive(false);
+        };
+
+        recognition.onend = () => {
+          setIsVoiceActive(false);
+        };
+
         recognitionRef.current = recognition;
+        recognition.start();
         setIsVoiceActive(true);
       } catch (e: any) {
-        alert('Lỗi thu âm giọng nói: ' + (e.message || e));
+        setIsVoiceActive(false);
+        if (e?.name !== 'InvalidStateError' && !e?.message?.includes('already started')) {
+          console.warn('Speech recognition notice:', e?.message || e);
+        }
       }
     }
   };

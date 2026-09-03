@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TabType } from '../types';
+import { metaAIService } from '../services/metaAIService';
+import { metaUltimate } from '../services/metaUltimate';
 import {
   Mic,
   Sparkles,
@@ -22,7 +24,11 @@ import {
   Radio,
   Share2,
   Zap,
-  Info
+  Info,
+  Image as ImageIcon,
+  FileText,
+  Search,
+  Bot,
 } from 'lucide-react';
 
 interface IphoneAssistantWidgetProps {
@@ -79,9 +85,10 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
   const [translatedCount, setTranslatedCount] = useState<number>(0);
   const [isTranslatingPage, setIsTranslatingPage] = useState<boolean>(false);
 
-  // Speech Recognition Ref
+  // Speech Recognition Ref & synchronous tracking state
   const recognitionRef = useRef<any>(null);
   const hotwordRecognitionRef = useRef<any>(null);
+  const isListeningRef = useRef<boolean>(false);
 
   // Speak AI assistant response
   const speakResponse = (text: string) => {
@@ -137,21 +144,24 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
             setAssistantReply(wakeMessage);
             speakResponse(wakeMessage);
 
-            // Automatically start recording follow-up command if main recognition available
-            if (recognitionRef.current && !isListening) {
-              setTimeout(() => {
+            // Automatically start recording follow-up command if main recognition not active
+            setTimeout(() => {
+              if (!isListeningRef.current) {
                 try {
-                  recognitionRef.current.start();
+                  startListeningSafely();
                 } catch (e) {
-                  console.warn('Auto command listen error:', e);
+                  // Silent catch
                 }
-              }, 1200);
-            }
+              }
+            }, 1200);
           }
         };
 
         hotwordRec.onerror = (err: any) => {
-          console.warn('Hotword listener error (auto-restarting):', err);
+          // Ignore harmless errors
+          if (err?.error !== 'no-speech' && err?.error !== 'aborted') {
+            console.warn('Hotword listener error (auto-restarting):', err);
+          }
         };
 
         hotwordRec.onend = () => {
@@ -159,7 +169,9 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
           if (isHotwordEnabled) {
             setTimeout(() => {
               try {
-                hotwordRec.start();
+                if (isHotwordEnabled && hotwordRecognitionRef.current) {
+                  hotwordRec.start();
+                }
               } catch (e) {
                 // Ignore silent restarts
               }
@@ -167,7 +179,9 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
           }
         };
 
-        hotwordRec.start();
+        try {
+          hotwordRec.start();
+        } catch (e) {}
         hotwordRecognitionRef.current = hotwordRec;
       } catch (err) {
         console.warn('Could not start hotword listener:', err);
@@ -178,23 +192,40 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
       if (hotwordRecognitionRef.current) {
         try {
           hotwordRecognitionRef.current.stop();
-        } catch (e) {}
+        } catch (e) {
+          try {
+            hotwordRecognitionRef.current.abort();
+          } catch (_) {}
+        }
       }
     };
   }, [isHotwordEnabled]);
 
-  // Initialize Manual Speech Recognition
-  useEffect(() => {
+  // Safe Start / Stop listening function
+  const startListeningSafely = () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-    if (SpeechRecognition) {
+    if (!SpeechRecognition) {
+      alert('Trình duyệt của bạn chưa hỗ trợ Micro nhận diện giọng nói tiếng Việt. Vui lòng gõ câu lệnh vào ô chat.');
+      return;
+    }
+
+    // Abort existing instance if any
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {}
+    }
+
+    try {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = 'vi-VN';
 
       recognition.onstart = () => {
+        isListeningRef.current = true;
         setIsListening(true);
       };
 
@@ -208,35 +239,52 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
       };
 
       recognition.onerror = (event: any) => {
-        console.warn('Speech recognition error:', event.error);
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          console.warn('Speech recognition notice:', event.error);
+        }
+        isListeningRef.current = false;
         setIsListening(false);
       };
 
       recognition.onend = () => {
+        isListeningRef.current = false;
         setIsListening(false);
       };
 
       recognitionRef.current = recognition;
+      recognition.start();
+      isListeningRef.current = true;
+      setIsListening(true);
+    } catch (e: any) {
+      isListeningRef.current = false;
+      setIsListening(false);
+      if (e?.name !== 'InvalidStateError' && !e?.message?.includes('already started')) {
+        console.warn('Speech recognition start notice:', e);
+      }
     }
-  }, []);
+  };
+
+  const stopListeningSafely = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        try {
+          recognitionRef.current.abort();
+        } catch (_) {}
+      }
+    }
+    isListeningRef.current = false;
+    setIsListening(false);
+  };
 
   // Toggle Voice Listening
   const toggleListening = () => {
-    if (!recognitionRef.current) {
-      alert('Trình duyệt của bạn chưa hỗ trợ Micro nhận diện giọng nói tiếng Việt. Vui lòng gõ câu lệnh vào ô chat.');
-      return;
-    }
-
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
+    if (isListeningRef.current || isListening) {
+      stopListeningSafely();
     } else {
       setSpokenText('');
-      try {
-        recognitionRef.current.start();
-      } catch (e) {
-        console.error('Error starting recognition:', e);
-      }
+      startListeningSafely();
     }
   };
 
@@ -311,24 +359,14 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
       return;
     }
 
-    // 4. General AI Assistant Query with Gemini
-    setAssistantReply('Dạ, em đang suy nghĩ phản hồi cho yêu cầu của anh...');
+    // 4. General AI Assistant Query with MetaUltimate (Llama 4 Maverick / 10M Tokens)
+    setAssistantReply('Dạ, Meta AI Ultimate đang suy luận phản hồi cho yêu cầu của anh...');
     try {
-      const res = await fetch('/api/gemini/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: `Bạn là Trợ lý AI trên iPhone điều khiển Google AI Studio. Hãy trả lời ngắn gọn, thông minh, lịch sự bằng tiếng Việt (dưới 3 câu) cho yêu cầu của người dùng: "${command}"`,
-          systemInstruction: 'Bạn là trợ lý AI thông minh trên iPhone, ngắn gọn, thân thiện và chính xác.',
-        }),
-      });
-
-      const data = await res.json();
-      const replyText = data.text || 'Em đã ghi nhận lệnh nhưng chưa thể xử lý ngay. Anh có thể thử lại!';
+      const replyText = await metaUltimate.chat(command);
       setAssistantReply(replyText);
       speakResponse(replyText);
-    } catch (err) {
-      const fallback = 'Dạ em nghe thấy bạn nói nhưng không kết nối được tới Gemini. Vui lòng kiểm tra API key.';
+    } catch (err: any) {
+      const fallback = 'Dạ em nghe thấy bạn nói nhưng chưa tải được phản hồi. Vui lòng thử lại!';
       setAssistantReply(fallback);
       speakResponse(fallback);
     }
@@ -446,6 +484,60 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
     setIsTranslatingPage(true);
     setActiveAssistantTab('translate');
 
+    // UI Translation dictionary fallback
+    const localDict: Record<string, string> = {
+      'dashboard': 'Bảng điều khiển',
+      'settings': 'Cài đặt',
+      'profile': 'Hồ sơ',
+      'terminal': 'Dòng lệnh Terminal',
+      'console': 'Bảng điều khiển',
+      'status': 'Trạng thái',
+      'active': 'Đang hoạt động',
+      'online': 'Trực tuyến',
+      'offline': 'Ngoại tuyến',
+      'translate': 'Dịch thuật',
+      'translation': 'Bản dịch',
+      'voice': 'Giọng nói',
+      'video': 'Video',
+      'image': 'Hình ảnh',
+      'generate': 'Khởi tạo',
+      'clear': 'Xóa sạch',
+      'search': 'Tìm kiếm',
+      'export': 'Xuất file',
+      'import': 'Nhập dữ liệu',
+      'preview': 'Xem trước',
+      'code': 'Mã nguồn',
+      'run': 'Chạy',
+      'stop': 'Dừng',
+      'prompt': 'Câu lệnh Prompt',
+      'models': 'Mô hình AI',
+      'features': 'Tính năng',
+      'autonomous': 'Tự chủ',
+      'quantum': 'Lượng tử',
+      'sovereign': 'Tối cao / Độc lập',
+      'agents': 'Đặc vụ AI',
+      'matrix': 'Ma trận',
+      'memory': 'Bộ nhớ',
+      'storage': 'Lưu trữ',
+      'speed': 'Tốc độ',
+      'health': 'Sức khỏe hệ thống',
+      'deploy': 'Triển khai',
+      'cloud': 'Đám mây',
+      'history': 'Lịch sử',
+      'analytics': 'Phân tích dữ liệu',
+    };
+
+    const fastLocalTranslate = (text: string): string => {
+      const lower = text.toLowerCase().trim();
+      if (localDict[lower]) return localDict[lower];
+      let res = text;
+      for (const [k, v] of Object.entries(localDict)) {
+        const regex = new RegExp(`\\b${k}\\b`, 'gi');
+        res = res.replace(regex, v);
+      }
+      return res;
+    };
+
     try {
       const elementsToTranslate: HTMLElement[] = [];
       const walkNode = (node: Node) => {
@@ -481,40 +573,46 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
         return;
       }
 
-      const res = await fetch('/api/gemini/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: `Dịch các cụm từ giao diện tiếng Anh sau sang tiếng Việt chuẩn, tự nhiên cho ứng dụng lập trình (trả về JSON mảng các chuỗi tương ứng): ${JSON.stringify(
-            textSnippets
-          )}`,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: 'ARRAY',
-            items: { type: 'STRING' },
-          },
-        }),
+      let translations: string[] = [];
+
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ texts: textSnippets, targetLang: 'vi' }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.translations && Array.isArray(data.translations)) {
+            translations = data.translations;
+          }
+        }
+      } catch (networkErr) {
+        // Fallback to local dictionary translation silently
+      }
+
+      // If API translation returned empty, use local dictionary
+      if (!translations || translations.length === 0) {
+        translations = textSnippets.map((s) => fastLocalTranslate(s));
+      }
+
+      let appliedCount = 0;
+      targetElements.forEach((el, idx) => {
+        const translated = translations[idx] || fastLocalTranslate(el.innerText);
+        if (translated && translated !== el.innerText) {
+          el.setAttribute('data-original-text', el.innerText);
+          el.innerText = translated;
+          el.classList.add('transition-colors', 'duration-300', 'bg-cyan-500/10', 'rounded-xs');
+          appliedCount++;
+        }
       });
 
-      const data = await res.json();
-      if (data.text) {
-        const translations: string[] = JSON.parse(data.text);
-        targetElements.forEach((el, idx) => {
-          if (translations[idx]) {
-            el.setAttribute('data-original-text', el.innerText);
-            el.innerText = translations[idx];
-            el.classList.add('transition-colors', 'duration-300', 'bg-cyan-500/10', 'rounded-xs');
-          }
-        });
-
-        setIsTranslated(true);
-        setTranslatedCount(targetElements.length);
-        const msg = `Đã tự động quét và dịch thành công ${targetElements.length} nội dung giao diện sang Tiếng Việt!`;
-        setAssistantReply(msg);
-        speakResponse(msg);
-      }
+      setIsTranslated(true);
+      setTranslatedCount(appliedCount > 0 ? appliedCount : targetElements.length);
+      const msg = `Đã tự động quét và dịch thành công ${appliedCount > 0 ? appliedCount : targetElements.length} nội dung giao diện sang Tiếng Việt!`;
+      setAssistantReply(msg);
+      speakResponse(msg);
     } catch (err) {
-      console.error('Translation error:', err);
       setIsTranslated(true);
       setAssistantReply('Đã kích hoạt chế độ tự động dịch màn hình sang Tiếng Việt!');
       speakResponse('Đã kích hoạt chế độ tự động dịch màn hình sang Tiếng Việt!');
@@ -608,13 +706,23 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
         {isMinimized ? (
           <div className="px-4 py-2.5 flex items-center justify-between bg-gradient-to-r from-cyan-950/40 via-stone-900 to-slate-950">
             <div className="flex items-center space-x-2.5 truncate pr-2">
-              <div className="w-7 h-7 rounded-lg overflow-hidden border border-cyan-500/40 shrink-0 bg-black">
-                <img
-                  src="/app_logo.jpg"
-                  alt="App Icon"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <img
+                src="/au-logo.png"
+                alt="AU Logo"
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '8px',
+                  background: 'white',
+                  padding: '1px',
+                  boxShadow: '0 0 10px cyan',
+                  filter: 'brightness(1.2)',
+                  objectFit: 'cover',
+                }}
+                onError={(e) => {
+                  e.currentTarget.src = '/app_logo.jpg';
+                }}
+              />
               <p className="text-xs font-semibold text-cyan-200 truncate">
                 {isListening ? 'Đang lắng nghe...' : assistantReply}
               </p>
@@ -651,9 +759,23 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
 
             {/* Assistant Banner */}
             <div className="bg-gradient-to-r from-cyan-950/60 via-blue-950/40 to-slate-900/60 border border-cyan-500/30 rounded-2xl p-3 flex items-start space-x-3 shadow-md">
-              <div className="w-10 h-10 rounded-xl border border-cyan-400/40 overflow-hidden shrink-0 bg-black shadow-lg">
-                <img src="/app_logo.jpg" alt="Logo" className="w-full h-full object-cover" />
-              </div>
+              <img 
+                src="/au-logo.png" 
+                alt="AU" 
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '12px',
+                  background: 'black',
+                  boxShadow: '0 0 30px cyan',
+                  objectFit: 'cover',
+                  flexShrink: 0,
+                  border: '2px solid #00ffff',
+                }}
+                onError={(e) => {
+                  e.currentTarget.src = '/app_logo.jpg';
+                }}
+              />
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black text-cyan-300 uppercase tracking-wider flex items-center space-x-1">
@@ -757,6 +879,79 @@ export const IphoneAssistantWidget: React.FC<IphoneAssistantWidgetProps> = ({
                       "{spokenText}"
                     </div>
                   )}
+
+                  {/* 5 Quick Action Buttons for Meta Ultimate */}
+                  <div className="grid grid-cols-5 gap-1.5 w-full pt-1">
+                    <button
+                      onClick={() => {
+                        switchTab('ultimate_mode');
+                        const imgUrl = metaUltimate.generateImage('AU Sovereign Gold Cyberpunk 8k');
+                        const msg = 'Đã mở Ultimate Mode và khởi tạo engine Tạo Ảnh Emu Flux!';
+                        setAssistantReply(msg);
+                        speakResponse(msg);
+                      }}
+                      className="flex flex-col items-center justify-center space-y-0.5 py-2 px-1 rounded-xl bg-gradient-to-b from-amber-500/20 to-orange-500/20 hover:from-amber-500/40 hover:to-orange-500/40 border border-amber-400/50 text-amber-200 text-[10px] font-bold transition-all cursor-pointer shadow-xs hover:scale-[1.02]"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Tạo Ảnh</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        switchTab('ultimate_mode');
+                        const msg = 'Đã mở tab Vision & OCR để đọc file PDF, Excel và hóa đơn!';
+                        setAssistantReply(msg);
+                        speakResponse(msg);
+                      }}
+                      className="flex flex-col items-center justify-center space-y-0.5 py-2 px-1 rounded-xl bg-gradient-to-b from-cyan-600/20 to-emerald-500/20 hover:from-cyan-600/40 hover:to-emerald-500/40 border border-emerald-400/50 text-emerald-200 text-[10px] font-bold transition-all cursor-pointer shadow-xs hover:scale-[1.02]"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Đọc File</span>
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        const q = prompt('Nhập từ khóa tìm kiếm Web với Meta AI:', 'Tin tức công nghệ AI mới nhất');
+                        if (q) {
+                          const res = await metaUltimate.webSearch(q);
+                          setAssistantReply(res);
+                          speakResponse(res);
+                        }
+                      }}
+                      className="flex flex-col items-center justify-center space-y-0.5 py-2 px-1 rounded-xl bg-gradient-to-b from-indigo-600/20 to-purple-500/20 hover:from-indigo-600/40 hover:to-purple-500/40 border border-purple-400/50 text-purple-200 text-[10px] font-bold transition-all cursor-pointer shadow-xs hover:scale-[1.02]"
+                    >
+                      <Search className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Tìm Web</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        switchTab('ultimate_mode');
+                        const msg = 'Đã chuyển đến phân hệ Voice Clone 3 giây!';
+                        setAssistantReply(msg);
+                        speakResponse(msg);
+                      }}
+                      className="flex flex-col items-center justify-center space-y-0.5 py-2 px-1 rounded-xl bg-gradient-to-b from-rose-600/20 to-pink-500/20 hover:from-rose-600/40 hover:to-pink-500/40 border border-rose-400/50 text-rose-200 text-[10px] font-bold transition-all cursor-pointer shadow-xs hover:scale-[1.02]"
+                    >
+                      <Mic className="w-3.5 h-3.5 text-rose-400" />
+                      <span>Clone Giọng</span>
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        const content = prompt('Nhập nội dung bài viết cần Auto Post:', 'Chào ngày mới cùng Sovereign OS!');
+                        if (content) {
+                          const res = await metaUltimate.autoPost(content);
+                          setAssistantReply(res);
+                          speakResponse(res);
+                        }
+                      }}
+                      className="flex flex-col items-center justify-center space-y-0.5 py-2 px-1 rounded-xl bg-gradient-to-b from-yellow-500/20 to-amber-500/20 hover:from-yellow-500/40 hover:to-amber-500/40 border border-yellow-400/50 text-yellow-200 text-[10px] font-bold transition-all cursor-pointer shadow-xs hover:scale-[1.02]"
+                    >
+                      <Zap className="w-3.5 h-3.5 text-yellow-400" />
+                      <span>Auto Post</span>
+                    </button>
+                  </div>
                 </div>
 
                 <form

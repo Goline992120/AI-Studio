@@ -12,7 +12,9 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
     "@google/genai": "^2.4.0",
+    "@google/generative-ai": "^0.24.1",
     "@langchain/google-genai": "^2.2.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
@@ -21,6 +23,7 @@
     "jszip": "^3.10.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
+    "openai": "^7.9.0",
     "prismjs": "^1.30.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",

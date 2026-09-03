@@ -1,8 +1,13 @@
 export type SdkLanguage = 'python' | 'typescript';
 
 export type TabType =
+  | 'hud_dashboard'
+  | 'ai_gateway'
+  | 'ultimate_mode'
   | 'google_studio'
+  | 'meta_ai'
   | 'super_intelligence'
+  | 'voice_interaction'
   | 'runway'
   | 'codestudio'
   | 'hermes'

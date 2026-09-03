@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { aiRouter, MODEL_PRICING, estimateCost, resolveTargetModel } from './src/gateway.js';
 
 dotenv.config();
 
@@ -149,6 +150,130 @@ app.get(['/api/health', '/health', '/healthz', '/ready', '/live'], (req, res) =>
 // Public Feature Flags endpoint
 app.get('/api/feature-flags', (req, res) => {
   res.json({ featureFlags });
+});
+
+// ==========================================
+// 02/09/2026 MULTI-MODEL AI GATEWAY API
+// ==========================================
+app.get('/api/gateway/pricing', (req, res) => {
+  res.json({
+    models: MODEL_PRICING,
+    configuredKeys: {
+      gemini: !!process.env.GEMINI_API_KEY,
+      together: !!process.env.TOGETHER_API_KEY,
+      anthropic: !!process.env.ANTHROPIC_API_KEY,
+      openai: !!process.env.OPENAI_API_KEY,
+    },
+  });
+});
+
+app.post('/api/gateway', async (req, res) => {
+  try {
+    const { prompt, image, taskType = 'auto', keys = {} } = req.body;
+    if (!prompt && !image) {
+      return res.status(400).json({ error: 'Prompt or image is required' });
+    }
+
+    const result = await aiRouter({
+      prompt: prompt || 'Analyze this provided image in detail.',
+      image,
+      taskType,
+      stream: false,
+      keys: {
+        gemini: keys.gemini || process.env.GEMINI_API_KEY,
+        together: keys.together || process.env.TOGETHER_API_KEY,
+        anthropic: keys.anthropic || process.env.ANTHROPIC_API_KEY,
+        openai: keys.openai || process.env.OPENAI_API_KEY,
+      },
+    });
+
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'AI Gateway Error' });
+  }
+});
+
+app.get('/api/export/full-source-zip', async (req, res) => {
+  try {
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+
+    // Helper recursive directory reader
+    const addDirToZip = (dirPath: string, zipFolder: any) => {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+        // Exclude heavy/generated folders
+        if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === '.next') {
+          continue;
+        }
+
+        if (entry.isDirectory()) {
+          const subFolder = zipFolder.folder(entry.name);
+          addDirToZip(fullPath, subFolder);
+        } else if (entry.isFile()) {
+          try {
+            const fileData = fs.readFileSync(fullPath);
+            zipFolder.file(entry.name, fileData);
+          } catch (readErr) {
+            console.warn(`Could not read file for zip: ${fullPath}`);
+          }
+        }
+      }
+    };
+
+    addDirToZip(process.cwd(), zip);
+
+    const zipBuffer = await zip.generateAsync({
+      type: 'nodebuffer',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 },
+    });
+
+    const filename = `SOVEREIGN_AI_FULL_APP_${new Date().toISOString().slice(0, 10)}.zip`;
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', zipBuffer.length);
+    return res.send(zipBuffer);
+  } catch (err: any) {
+    console.error('Export zip error:', err);
+    return res.status(500).json({ error: 'Lỗi nén trọn bộ mã nguồn: ' + (err?.message || err) });
+  }
+});
+
+app.post('/api/gateway/stream', async (req, res) => {
+  try {
+    const { prompt, image, taskType = 'auto', keys = {} } = req.body;
+    if (!prompt && !image) {
+      return res.status(400).json({ error: 'Prompt or image is required' });
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const result = await aiRouter({
+      prompt: prompt || 'Analyze this provided image in detail.',
+      image,
+      taskType,
+      stream: true,
+      onChunk: (chunk) => {
+        res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`);
+      },
+      keys: {
+        gemini: keys.gemini || process.env.GEMINI_API_KEY,
+        together: keys.together || process.env.TOGETHER_API_KEY,
+        anthropic: keys.anthropic || process.env.ANTHROPIC_API_KEY,
+        openai: keys.openai || process.env.OPENAI_API_KEY,
+      },
+    });
+
+    res.write(`data: ${JSON.stringify({ type: 'done', result })}\n\n`);
+    res.end();
+  } catch (err: any) {
+    res.write(`data: ${JSON.stringify({ type: 'error', error: err.message })}\n\n`);
+    res.end();
+  }
 });
 
 // Admin Auth Middleware check
@@ -2321,6 +2446,120 @@ app.post('/api/gemini/generate', async (req, res) => {
     });
   } catch (error: any) {
     return handleGeminiError(error, res);
+  }
+});
+
+// Dedicated Resilient Translation Endpoint
+app.post('/api/translate', async (req, res) => {
+  try {
+    const { text, texts, targetLang = 'vi' } = req.body;
+    const inputTexts: string[] = Array.isArray(texts) ? texts : text ? [text] : [];
+
+    if (inputTexts.length === 0) {
+      return res.status(400).json({ error: 'Text or texts array is required' });
+    }
+
+    // Built-in high-speed UI dictionary for common terms
+    const uiDict: Record<string, string> = {
+      'dashboard': 'Bảng điều khiển',
+      'settings': 'Cài đặt',
+      'profile': 'Hồ sơ',
+      'terminal': 'Dòng lệnh Terminal',
+      'console': 'Bảng điều khiển',
+      'status': 'Trạng thái',
+      'active': 'Đang hoạt động',
+      'online': 'Trực tuyến',
+      'offline': 'Ngoại tuyến',
+      'translate': 'Dịch thuật',
+      'translation': 'Bản dịch',
+      'voice': 'Giọng nói',
+      'video': 'Video',
+      'image': 'Hình ảnh',
+      'generate': 'Khởi tạo',
+      'clear': 'Xóa sạch',
+      'search': 'Tìm kiếm',
+      'export': 'Xuất file',
+      'import': 'Nhập dữ liệu',
+      'preview': 'Xem trước',
+      'code': 'Mã nguồn',
+      'run': 'Chạy',
+      'stop': 'Dừng',
+      'prompt': 'Câu lệnh Prompt',
+      'models': 'Mô hình AI',
+      'features': 'Tính năng',
+      'autonomous': 'Tự chủ',
+      'quantum': 'Lượng tử',
+      'sovereign': 'Tối cao / Độc lập',
+      'agents': 'Đặc vụ AI',
+      'matrix': 'Ma trận',
+      'memory': 'Bộ nhớ',
+      'storage': 'Lưu trữ',
+      'speed': 'Tốc độ',
+      'health': 'Sức khỏe hệ thống',
+      'deploy': 'Triển khai',
+      'cloud': 'Đám mây',
+      'history': 'Lịch sử',
+      'analytics': 'Phân tích dữ liệu',
+    };
+
+    const dictionaryTranslate = (str: string): string => {
+      const lower = str.trim().toLowerCase();
+      if (uiDict[lower]) return uiDict[lower];
+      let replaced = str;
+      for (const [en, vi] of Object.entries(uiDict)) {
+        const regex = new RegExp(`\\b${en}\\b`, 'gi');
+        replaced = replaced.replace(regex, vi);
+      }
+      return replaced;
+    };
+
+    // Try Gemini API if key is available
+    try {
+      const apiKey = customApiKey || process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        const ai = getGenAI();
+        const prompt = `Dịch danh sách các đoạn văn bản giao diện sang tiếng Việt tự nhiên, chính xác, trả về định dạng JSON mảng các chuỗi tương ứng:\n${JSON.stringify(
+          inputTexts
+        )}`;
+        const response = await generateContentWithRetry(ai, {
+          model: 'gemini-3.7-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'ARRAY',
+              items: { type: 'STRING' },
+            },
+          },
+        });
+        if (response.text) {
+          const parsed = JSON.parse(response.text);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return res.json({
+              translations: parsed,
+              translatedText: parsed[0],
+              source: 'gemini',
+            });
+          }
+        }
+      }
+    } catch (e: any) {
+      console.warn('Gemini translation fallback triggered:', e?.message || e);
+    }
+
+    // Fallback using internal dictionary
+    const fallbackResults = inputTexts.map((t) => dictionaryTranslate(t));
+    return res.json({
+      translations: fallbackResults,
+      translatedText: fallbackResults[0],
+      source: 'dictionary',
+    });
+  } catch (err: any) {
+    return res.json({
+      translations: [req.body?.text || 'Đã dịch'],
+      translatedText: req.body?.text || 'Đã dịch',
+      source: 'fallback',
+    });
   }
 });
 

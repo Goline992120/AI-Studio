@@ -32,32 +32,58 @@ export const AppExportTab: React.FC = () => {
     setTimeout(() => setCopiedSection(null), 2000);
   };
 
-  // Generate and Download Full Source ZIP client-side with App Logo and Scripts
+  // Generate and Download Full Source ZIP with direct server stream and client fallback
   const handleDownloadFullZip = async () => {
     setIsExportingZip(true);
-    setExportProgress('Đang thu thập tài nguyên và cấu hình đóng gói...');
+    setExportProgress('Đang nén toàn bộ kho mã nguồn và tài nguyên ứng dụng...');
 
     try {
+      // 1. Try server-side full package streaming
+      const response = await fetch('/api/export/full-source-zip');
+      if (response.ok) {
+        setExportProgress('Đang tải file ZIP trọn bộ về máy tính...');
+        const blob = await response.blob();
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `SOVEREIGN_AI_FULL_APP_${new Date().toISOString().slice(0, 10)}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+
+        setExportProgress('✅ Xuất gói trọn bộ ứng dụng thành công!');
+        setTimeout(() => setExportProgress(''), 4000);
+        return;
+      }
+    } catch (serverErr) {
+      console.warn('Server-side zip export fallback to client-side packaging:', serverErr);
+    }
+
+    // 2. Client-side fallback if server stream failed
+    try {
+      setExportProgress('Đang đóng gói tài nguyên dự phòng phía client...');
       const zip = new JSZip();
 
-      // Fetch app info and manifest
-      setExportProgress('Đang đóng gói logo, biểu tượng PWA và manifest.json...');
-      
-      const manifestRes = await fetch('/public/manifest.json');
-      const manifestText = await manifestRes.text();
-      zip.file('public/manifest.json', manifestText);
+      // Manifest & configs
+      try {
+        const manifestRes = await fetch('/public/manifest.json');
+        if (manifestRes.ok) {
+          const manifestText = await manifestRes.text();
+          zip.file('public/manifest.json', manifestText);
+        }
+      } catch (e) {}
 
       // Package README & Configs
-      setExportProgress('Đang nén tài liệu hướng dẫn và Dockerfile...');
-      const readmeText = `# AI CODE Studio & AI Vision (Hoàn Chỉnh)
+      const readmeText = `# SOVEREIGN CODE & AI VISION (TRỌN BỘ ỨNG DỤNG)
 - Chạy trên mọi thiết bị: iOS, Android, Windows, macOS, Linux, Docker.
-- Đầy đủ tính năng: Siêu Trí Tuệ Đa Thư Mục, Hermes Auto-Healing, Code Studio, Trợ lý iPhone.
+- Đầy đủ tính năng: Multi-Model AI Gateway, Live Camera, Voice Microphone, Sovereign Commander V10.
 - Lệnh chạy:
   npm install
   npm run build
   npm start
 - Lệnh đóng gói Desktop (.exe / .dmg / .AppImage):
-  npx electron-builder
+  npm run build:electron
 `;
       zip.file('README.md', readmeText);
 
@@ -94,7 +120,7 @@ function createWindow() {
     height: 850,
     minWidth: 1024,
     minHeight: 700,
-    title: 'AI CODE Studio & Vision Desktop',
+    title: 'SOVEREIGN CODE Desktop',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -133,14 +159,14 @@ app.on('window-all-closed', () => {
       const downloadUrl = URL.createObjectURL(content);
       const a = document.createElement('a');
       a.href = downloadUrl;
-      a.download = `AI_CODE_Studio_Full_App_${new Date().toISOString().slice(0, 10)}.zip`;
+      a.download = `SOVEREIGN_AI_FULL_APP_${new Date().toISOString().slice(0, 10)}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(downloadUrl);
 
-      setExportProgress('✅ Xuất gói ứng dụng thành công!');
-      setTimeout(() => setExportProgress(''), 3000);
+      setExportProgress('✅ Xuất gói trọn bộ ứng dụng thành công!');
+      setTimeout(() => setExportProgress(''), 4000);
     } catch (err: any) {
       alert(`Lỗi xuất zip: ${err.message || err}`);
     } finally {
@@ -150,6 +176,92 @@ app.on('window-all-closed', () => {
 
   return (
     <div className="space-y-6">
+      {/* Top Direct App Link Banner (Public URL) */}
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-950 via-indigo-950 to-cyan-950 border border-cyan-400/50 shadow-2xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-black font-bold shadow-lg shrink-0">
+              <Globe className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base sm:text-lg font-bold text-white tracking-wide">
+                  Đường Link Trực Tiếp Của Ứng Dụng (Live Public URL)
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-mono border border-emerald-500/40 font-bold">
+                  ● Trực Tuyến 24/7
+                </span>
+              </div>
+              <p className="text-xs text-white/70 mt-0.5">
+                Bất kỳ ai mở đường link này đều có thể truy cập toàn bộ tính năng trên Máy tính, iPhone và Android mà không cần cài đặt thêm.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* URL Box & Actions */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              readOnly
+              value="https://ais-dev-4sfsxac6h73u4sixirefwd-242634554274.asia-southeast1.run.app/"
+              className="w-full pl-4 pr-10 py-3 bg-black/90 border border-cyan-500/50 rounded-xl text-xs sm:text-sm font-mono text-cyan-200 focus:outline-hidden select-all shadow-inner"
+            />
+            <ExternalLink className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400/60 pointer-events-none" />
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText('https://ais-dev-4sfsxac6h73u4sixirefwd-242634554274.asia-southeast1.run.app/');
+                setCopiedSection('shared-url');
+                setTimeout(() => setCopiedSection(null), 3000);
+              }}
+              className="flex-1 sm:flex-none px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-lg shadow-cyan-500/25"
+            >
+              {copiedSection === 'shared-url' ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-black" />
+                  <span>ĐÃ SAO CHÉP LINK!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>SAO CHÉP LINK</span>
+                </>
+              )}
+            </button>
+
+            <a
+              href="https://ais-dev-4sfsxac6h73u4sixirefwd-242634554274.asia-southeast1.run.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer border border-white/10 shrink-0"
+              title="Mở ứng dụng trong tab mới"
+            >
+              <span>Mở Tab Mới</span>
+              <ExternalLink className="w-4 h-4 text-white/80" />
+            </a>
+          </div>
+        </div>
+
+        {/* Mobile & QR Shortcut */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-[11px] text-white/60">
+          <span>📱 Hoạt động hoàn hảo trên iPhone Safari & Android Chrome</span>
+          <div className="flex items-center space-x-3">
+            <a
+              href="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fais-dev-4sfsxac6h73u4sixirefwd-242634554274.asia-southeast1.run.app%2F"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 font-medium underline flex items-center space-x-1"
+            >
+              <span>Xem Mã QR Quét Trên Điện Thoại ↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Top Banner */}
       <div className="bg-gradient-to-r from-[#121216] via-[#1a1c29] to-[#0d1c24] border border-emerald-500/30 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -157,7 +269,7 @@ app.on('window-all-closed', () => {
           <div className="flex items-center space-x-4">
             <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-emerald-400/50 shadow-xl shadow-emerald-500/20 shrink-0">
               <img
-                src="/public/app_logo.jpg"
+                src="/au-logo.png"
                 alt="App Logo"
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -363,7 +475,7 @@ docker run -d -p 3000:3000 -e GEMINI_API_KEY="your_api_key" --name ai-app ai-cod
               <div className="flex-1 flex flex-col items-center justify-center space-y-3">
                 <div className="relative group cursor-pointer">
                   <div className="w-18 h-18 rounded-2xl overflow-hidden border-2 border-cyan-400 shadow-2xl shadow-cyan-500/30 transform hover:scale-105 transition-all">
-                    <img src="/public/app_logo.jpg" alt="App Icon" className="w-full h-full object-cover" />
+                    <img src="/au-logo.png" alt="App Icon" className="w-full h-full object-cover" />
                   </div>
                   <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white font-bold text-[9px] rounded-full flex items-center justify-center shadow">
                     1
@@ -398,7 +510,7 @@ docker run -d -p 3000:3000 -e GEMINI_API_KEY="your_api_key" --name ai-app ai-cod
               {/* Desktop Window Body */}
               <div className="flex-1 p-4 flex flex-col items-center justify-center text-center space-y-3 bg-[#0d0d10]">
                 <div className="w-16 h-16 rounded-2xl overflow-hidden border border-cyan-400 shadow-lg shadow-cyan-500/20">
-                  <img src="/public/app_logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+                  <img src="/au-logo.png" alt="Logo" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-white">AI CODE Studio & Multi-Agent</h4>

@@ -1,16 +1,23 @@
 {
-  "short_name": "GeminiStudio",
-  "name": "Gemini SDK Code Studio & AI Vision",
+  "name": "Sovereign OS Ultimate v5.0 / v3.1.2 - Quantum HUD & Omni AI",
+  "short_name": "Sovereign OS",
+  "description": "Sovereign OS Quantum AI Studio & Omni Core Interface",
   "icons": [
     {
-      "src": "/app_logo.jpg",
-      "type": "image/jpeg",
-      "sizes": "512x512"
+      "src": "/au-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/au-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
-  "background_color": "#0d0d0d",
-  "theme_color": "#0d0d0d",
   "display": "standalone",
-  "orientation": "portrait"
+  "theme_color": "#00ffff",
+  "background_color": "#010208"
 }
